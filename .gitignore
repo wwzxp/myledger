@@ -16,6 +16,10 @@ coverage/
 !.env.example
 *.log
 *.tmp
+# 部署配置含 [mail].secret_key（主密钥），绝不能入库
+ai-ledger.toml
+# 迁移包
+*.zip
 
 # Python
 __pycache__/
@@ -35,6 +39,7 @@ build/
 dist/
 
 # 部署凭据（隧道 token 不入门禁范围，另存于 E:/ai/apps/ai-ledger）
+tunnel-token.txt
 *.log
 
 # 部署临时产物与私钥：绝不入库
