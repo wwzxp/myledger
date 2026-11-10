@@ -1,0 +1,16 @@
+GSAP 3.12.5
+https://gsap.com
+
+Copyright 2024, GreenSock. All rights reserved.
+
+GSAP 采用 GreenSock 的 "Standard No Charge" 许可证，不是 MIT。
+本仓库在 app/bookkeeping_app/static/demo/gsap.min.js 内置了该库，
+用于导入页的功能演示动画。
+
+许可要点（详见 https://gsap.com/standard-license）：
+- 个人、非商业、以及大多数商业站点可免费使用核心库；
+- 销售 GSAP 本身或将其作为产品主体的转售行为需要商业授权；
+- 本项目仅把它作为界面动画工具使用，不转售、不二次分发为独立产品。
+
+如未来需要替换，可将 demo/ 下的动画改用浏览器原生 Web Animations API，
+场景脚本的编排方式可保持不变。

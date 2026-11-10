@@ -1,0 +1,118 @@
+/* 登录页与主界面共用同一套配色 token，避免两处各写一份色值后走样 */
+:root {
+  /* 与主界面同一套：纸白、近黑墨、朱红只做标记 */
+  --bg: oklch(98.5% 0.002 250);
+  --ink: oklch(20% 0.005 250);
+  --ink-soft: oklch(32% 0.006 250);
+  --muted: oklch(50% 0.008 250);
+  --panel: oklch(100% 0 0);
+  --panel-2: oklch(96.4% 0.003 250);
+  --line: oklch(91% 0.004 250);
+  --line-strong: oklch(82% 0.006 250);
+  --accent: oklch(20% 0.005 250);
+  --accent-ink: oklch(99% 0 0);
+  --accent-soft: oklch(93% 0.004 250);
+  --red: oklch(52% 0.19 27);
+  --radius: 4px;
+  --font-zh: "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC",
+             "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-num: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --font-ui: var(--font-zh);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: oklch(18.5% 0.004 250);
+    --ink: oklch(95% 0.002 250);
+    --ink-soft: oklch(84% 0.003 250);
+    --muted: oklch(66% 0.006 250);
+    --panel: oklch(22% 0.005 250);
+    --panel-2: oklch(25% 0.005 250);
+    --line: oklch(32% 0.006 250);
+    --line-strong: oklch(42% 0.007 250);
+    --accent: oklch(95% 0.002 250);
+    --accent-ink: oklch(18.5% 0.004 250);
+    --accent-soft: oklch(29% 0.006 250);
+    --red: oklch(65% 0.17 27);
+  }
+}
+
+html, body { overflow-x: clip; }
+.login-body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+               "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
+               "Noto Sans CJK SC", sans-serif;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  padding: 40px 24px;
+}
+.login-card h1 {
+  margin: 0 0 8px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+  font-size: 1.44rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+.login-card > .muted { margin: 0 0 20px; font-size: 13px; color: var(--muted); }
+.login-form { display: grid; gap: 16px; }
+.login-form label { display: grid; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.login-form input {
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 16px; /* 16px 避免 iOS 自动放大 */
+  box-sizing: border-box;
+}
+.login-form input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.login-form button {
+  padding: 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.login-form button:disabled {
+  background: var(--line);
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.login-error {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 13px;
+}
+.login-hint { margin: 16px 0 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.login-form { margin-bottom: 4px; }
+@media (max-width: 420px) {
+  .login-card { padding: 24px 16px; }
+}

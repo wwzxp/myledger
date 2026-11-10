@@ -1,0 +1,50 @@
+# 真实账单与本地数据：绝不入库
+data/
+
+# 构建产物
+node_modules/
+dist/
+build/
+coverage/
+
+# 索引与缓存（codegraph 数据库是生成物）
+.codegraph/
+
+# 本地配置与日志
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+
+# Python
+__pycache__/
+*.pyc
+
+# 本地数据库与临时产物
+*.db
+*.db-shm
+*.db-wal
+
+# 工程纪律工具的输出
+.metrics/
+
+# Python 打包产物
+*.egg-info/
+build/
+dist/
+
+# 部署凭据（隧道 token 不入门禁范围，另存于 E:/ai/apps/ai-ledger）
+*.log
+
+# 部署临时产物与私钥：绝不入库
+.deploy/
+artifacts/
+release/
+
+# 视频/录屏：体积大且易误提交，需要分享时放网盘或 Release
+*.mp4
+*.mov
+*.avi
+*.mkv
+.run/

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="本地记账看板登录">
+  <title>登录 · 我的账本</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="stylesheet" href="/static/dashboard.css?v=20261108f">
+  <link rel="stylesheet" href="/static/login.css?v=20261108f">
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <h1>我的账本</h1>
+    <p class="muted">本地优先的账单分析工具</p>
+
+    <form id="loginForm" class="login-form" autocomplete="on">
+      <label>
+        <span>用户名</span>
+        <input id="username" name="username" type="text" autocomplete="username" required>
+      </label>
+      <label>
+        <span>密码</span>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="primary" type="submit" id="submitBtn">登录</button>
+      <p class="login-error hidden" id="loginError"></p>
+    </form>
+
+    <p class="muted login-hint">账号由管理员创建。忘记密码请联系管理员重置。</p>
+  </main>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const errorBox = document.getElementById("loginError");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorBox.classList.add("hidden");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "登录中…";
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value,
+          }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || `登录失败（HTTP ${response.status}）`);
+        window.location.replace("/");
+      } catch (error) {
+        errorBox.textContent = error.message;
+        errorBox.classList.remove("hidden");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "登录";
+      }
+    });
+  </script>
+</body>
+</html>

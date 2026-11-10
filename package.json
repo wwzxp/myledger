@@ -1,0 +1,10 @@
+{
+  "name": "myledger-docs-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "仓库工具（文档门禁与 PDF 预处理）。应用本体是 Python，见 app/ 与 README.md。",
+  "scripts": {
+    "doc:check": "node scripts/doc-check.mjs"
+  }
+}
