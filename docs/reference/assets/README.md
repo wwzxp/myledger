@@ -154,3 +154,62 @@ python frame-crop.py frame.png --outdir crops --emit-spec screens.json
 
 **别在别处另写一份**：实测因为 `minCount` 用了旧逻辑，
 屏找到了但计数全是 0，排查了很久。
+
+## 移植到另一个项目：要拷什么
+
+**核心三件**，缺一不可：
+
+| 文件 | 大小 | 作用 |
+|---|---|---|
+| `演示动画制作说明.md`（在上级目录） | 约 3000 行 | 方法论 + 骨架代码 + 全部实测坑 |
+| `frame-crop.py` | 13 KB | 切图 + 数结构 |
+| `verify.js` | 22 KB | 断言式验收 |
+
+**外加两样运行时依赖**（不是本仓库的文件）：
+
+| 依赖 | 怎么拿 | 放哪 |
+|---|---|---|
+| `gsap.min.js` | GSAP 3 官方发行版 | 必须和你的 `index.html` **同目录** |
+| `puppeteer-core` | `npm i puppeteer-core` 或全局装一份 | 用 `--puppeteer <绝对路径>` 指过去 |
+
+**没有 puppeteer 也能跑**：`verify.js` 会依次尝试
+`--puppeteer` 参数 → `PUPPETEER_CORE` 环境变量 → 当前目录的 `node_modules/puppeteer-core`。
+都没有就报错退出。
+
+**Chrome 也不用装 puppeteer 自带的那份**：`findChrome()` 会探测
+`C:/Program Files/Google/Chrome/Application/chrome.exe` 等常见位置。
+
+### 最小可跑目录
+
+```text
+your-demo/
+├── demo/
+│   ├── index.html          ← 引用下面的 gsap.min.js
+│   ├── gsap.min.js         ← 必须同级
+│   ├── stage.js            ← 从文档 §3.2 复制
+│   ├── kit.js              ← 从文档 §3.3 复制
+│   ├── demo.css            ← 从文档 §3.4 复制
+│   └── scenes/
+│       ├── index.js
+│       └── your-scene.js
+├── screens.json            ← frame-crop.py --emit-spec 生成
+├── frame-crop.py
+└── verify.js
+```
+
+### 三个文件都不依赖本仓库
+
+`frame-crop.py` 只依赖 `numpy` + `PIL`；
+`verify.js` 只依赖 `node` + 一个 puppeteer 实例；
+文档是纯 Markdown，图片和骨架代码全在正文里。
+
+**不需要拷贝的**：本仓库的 `app/`、`tests/`、`docs/reference/demo/` 等。
+
+### 拷过去之后先验证环境
+
+```bash
+python frame-crop.py 你的基准帧.png --outdir crops   # 能不能切
+node verify.js --url http://127.0.0.1:8899/demo/index.html --seconds 2  # 能不能连上
+```
+
+两条都通过再开始做场景，否则后面所有报错都分不清是环境问题还是实现问题。

@@ -2496,8 +2496,9 @@
       const password = $("mailPass").value;
       const body = {
         username: $("mailUser").value.trim(),
-        // 保持占位符时不覆盖已保存的授权码
-        password: password === "********" ? "" : password,
+        // 占位符原样回传：后端约定 "********" 表示「保留原授权码」，
+        // 空字符串表示「清空」。此前这里改成空串，只改账号就把授权码抹掉了。
+        password: password,
       };
       try {
         const response = await fetch("/api/mail-settings", {
@@ -2670,6 +2671,7 @@
       button.onclick = async () => {
         const status = $("mailFetchStatus");
         status.textContent = "正在连接邮箱…";
+        status.classList.remove("error-text");
         button.disabled = true;
         try {
           const response = await fetch("/api/mail-fetch", {
@@ -2690,17 +2692,32 @@
           if (linkCount) parts.push(`发现 ${linkCount} 个下载链接`);
           status.textContent = parts.join("，") + (savedCount || linkCount ? "" : "，没有新账单");
 
-          // 链接型邮件：逐个下载
+          // 链接型邮件：逐个下载，失败必须给出可见提示
+          const failures = [];
           for (const link of payload.links || []) {
-            await fetch("/api/mail-download", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({ url: link.url, uid: link.uid, subject: link.subject }),
-            });
+            try {
+              const response = await fetch("/api/mail-download", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ url: link.url, uid: link.uid, subject: link.subject }),
+              });
+              const result = await response.json().catch(() => ({}));
+              if (!response.ok) {
+                const reason = result.error || `下载失败（HTTP ${response.status}）`;
+                failures.push(result.hint ? `${reason}；${result.hint}` : reason);
+              }
+            } catch (error) {
+              failures.push(`下载失败：${error.message || error}`);
+            }
+          }
+          if (failures.length) {
+            status.textContent = `${parts.join("，")}。${failures.join("；")}`;
+            status.classList.add("error-text");
           }
           loadMailPending();
         } catch (error) {
           status.textContent = error.message;
+          status.classList.add("error-text");
         } finally {
           button.disabled = false;
         }

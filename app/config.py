@@ -38,6 +38,28 @@ from pathlib import Path
 
 CONFIG_FILENAME = "myledger.toml"
 
+# `--config` 显式指定的配置文件。启动时由 `_apply_config()` 固化下来，
+# 之后所有无参 `load_config()` 都读它——否则子命令与 HTTP 处理里的
+# 配置读取会退回到目录发现，在配置文件名不是 myledger.toml 的部署上
+# 直接读到内置默认值（表现为「已配置 secret_key 却报缺少主密钥」）。
+ACTIVE_CONFIG_PATH: Path | None = None
+
+
+def set_config_path(path: str | Path | None) -> Path | None:
+    """固化后续无参 `load_config()` 使用的配置文件。"""
+    global ACTIVE_CONFIG_PATH
+    if path is None:
+        ACTIVE_CONFIG_PATH = None
+        return None
+    target = Path(path).expanduser()
+    ACTIVE_CONFIG_PATH = target if target.is_file() else None
+    return ACTIVE_CONFIG_PATH
+
+
+def active_config_path() -> Path | None:
+    """当前生效的配置文件；没有则返回 None（走目录发现或内置默认值）。"""
+    return ACTIVE_CONFIG_PATH
+
 
 @dataclass(frozen=True)
 class ModelConfig:
@@ -120,6 +142,10 @@ def load_config(path: str | Path | None = None, start: Path | None = None) -> Co
         if not target.is_file():
             raise FileNotFoundError(f"配置文件不存在：{target}")
         return _parse(target, target)
+
+    # 显式指定过一次就固定用它，不再做目录发现。
+    if ACTIVE_CONFIG_PATH is not None and start is None:
+        return _parse(ACTIVE_CONFIG_PATH, ACTIVE_CONFIG_PATH)
 
     for candidate in candidate_paths(start):
         # 父目录可能没有读权限（例如以服务账号运行、当前目录是 /root），

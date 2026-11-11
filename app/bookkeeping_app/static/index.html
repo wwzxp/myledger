@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="manifest" href="/static/manifest.json">
   <link rel="apple-touch-icon" href="/static/icon-192.png">
-  <link rel="stylesheet" href="/static/dashboard.css?v=20261109e">
+  <link rel="stylesheet" href="/static/dashboard.css?v=20261110a">
   <link rel="stylesheet" href="/static/demo/demo.css?v=20261109k">
 </head>
 <body>
@@ -285,7 +285,7 @@
               <button class="primary" id="mailSave" type="button">保存</button>
               <span class="muted" id="mailStatus"></span>
             </div>
-            <p class="muted mail-hint">QQ 邮箱：设置 → 账号 → 开启 IMAP 服务 → 生成授权码。授权码只保存在本机配置文件里。</p>
+            <p class="muted mail-hint">QQ 邮箱：设置 → 账号 → 开启 IMAP 服务 → 生成授权码。授权码加密后存在本机数据库，主密钥在配置文件的 [mail] 段。</p>
           </div>
 
           <div class="settings-block hidden" id="userAdminBlock">
@@ -353,7 +353,7 @@
   </div>
 
   <div class="d-overlay hidden" id="demoOverlay"></div>
-  <script src="/static/dashboard.js?v=20261108f"></script>
+  <script src="/static/dashboard.js?v=20261110a"></script>
   <script>
     // 功能演示：按需加载，首次点击才拉 GSAP 与场景脚本
     (() => {

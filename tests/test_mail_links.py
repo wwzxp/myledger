@@ -51,6 +51,18 @@ class FakeIMAP:
     def select(self, mailbox_name, readonly=False):
         return "OK", [b"1"]
 
+    def uid(self, command, *args):
+        if command == "SEARCH":
+            return "OK", [b" ".join(FakeIMAP.messages.keys())]
+        if command == "FETCH":
+            uid = args[0]
+            return "OK", [(uid + b" (RFC822)", FakeIMAP.messages[uid])]
+        if command == "STORE":
+            uid, flag, value = args
+            self.stored.append((uid, flag, value))
+            return "OK", [b""]
+        raise AssertionError(f"unexpected UID command: {command}")
+
     def search(self, charset, *criteria):
         return "OK", [b" ".join(FakeIMAP.messages.keys())]
 

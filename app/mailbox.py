@@ -192,6 +192,49 @@ def delete_attachment(inbox_dir: str | Path, name: str) -> bool:
     return True
 
 
+def unmark_seen(
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    uid: str,
+    mailbox: str = "INBOX",
+    timeout: int = 30,
+) -> bool:
+    """把某封邮件改回未读。
+
+    链接型邮件在收取阶段就被标成已读（因为解析出了下载链接就算「处理过」），
+    但如果随后下载失败，用户下次点「从邮箱收取」就再也看不到这封邮件了。
+    失败时调用本函数把标志位撤回来，让下次还能重试。返回是否成功。
+    """
+    if not (uid or "").strip():
+        return False
+    try:
+        if port == 993:
+            connection = imaplib.IMAP4_SSL(host, port, ssl_context=ssl.create_default_context(), timeout=timeout)
+        else:
+            connection = imaplib.IMAP4(host, port, timeout=timeout)
+    except (OSError, IMAP_ERROR):
+        return False
+    try:
+        try:
+            connection.login(username, password)
+        except IMAP_ERROR:
+            return False
+        status, _ = connection.select(mailbox, readonly=False)
+        if status != "OK":
+            return False
+        okay, _ = connection.uid("STORE", uid.encode("ascii", "ignore"), "-FLAGS", "\\Seen")
+        return okay == "OK"
+    except (OSError, IMAP_ERROR, ValueError):
+        return False
+    finally:
+        try:
+            connection.logout()
+        except Exception:
+            pass
+
+
 def _secure_mkdir(path: Path) -> None:
     """建目录并收到只有属主可用。邮件附件里是完整账单，属敏感数据。"""
     path.mkdir(parents=True, exist_ok=True)
@@ -266,7 +309,9 @@ def fetch_bill_attachments(
 
         # 只看最近 days 天的未读：不指定日期会把几百封历史未读全翻一遍。
         since = (datetime.now() - timedelta(days=max(1, days))).strftime("%d-%b-%Y")
-        status, data = connection.search(None, "UNSEEN", "SINCE", since)
+        # 必须用 UID SEARCH / UID FETCH：序列号只在本会话内有效，
+        # 下载失败后要靠 UID 在新连接上把邮件改回未读，序列号做不到。
+        status, data = connection.uid("SEARCH", None, "UNSEEN", "SINCE", since)
         if status != "OK":
             raise MailError("搜索未读邮件失败")
 
@@ -276,7 +321,7 @@ def fetch_bill_attachments(
 
         for uid in uids:
             uid_text = uid.decode()
-            status, payload = connection.fetch(uid, "(RFC822)")
+            status, payload = connection.uid("FETCH", uid, "(RFC822)")
             if status != "OK" or not payload or not isinstance(payload[0], tuple):
                 result.skipped.append(f"UID {uid_text}：读取失败")
                 continue
@@ -329,7 +374,7 @@ def fetch_bill_attachments(
                 found = True
 
             if found and mark_seen:
-                connection.store(uid, "+FLAGS", "\\Seen")
+                connection.uid("STORE", uid, "+FLAGS", "\\Seen")
     finally:
         try:
             connection.logout()

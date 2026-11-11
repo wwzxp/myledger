@@ -21,10 +21,14 @@ from app.classify import ModelUnavailable, classify_pending
 
 def _apply_config(path: str | None) -> Path | None:
     """读取配置文件并应用到模块级路径。返回实际使用的配置文件。"""
-    from app.config import load_config
+    from app.config import load_config, set_config_path
 
     config = load_config(path)
     bookkeeping.set_db_path(config.database.path)
+    # 固化下来：之后 HTTP 处理与子命令里的无参 load_config() 必须读同一份，
+    # 否则会退回目录发现，拿到内置默认值（secret_key 变空）。
+    if path is not None:
+        set_config_path(path)
     return config.source
 
 

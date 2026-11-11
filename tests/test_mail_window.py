@@ -32,6 +32,28 @@ class FakeIMAP:
     def select(self, mailbox_name, readonly=False):
         return "OK", [b"1"]
 
+    def uid(self, command, *args):
+        if command == "SEARCH":
+            # 记录真实使用的搜索条件（UID SEARCH 的 criteria 在 args[1:]）
+            self.search_args = args[1:]
+            return "OK", [b" ".join(FakeIMAP.messages.keys())]
+        if command == "FETCH":
+            uid = args[0]
+            from email.message import EmailMessage
+
+            message = EmailMessage()
+            message["Subject"] = "微信支付账单"
+            message["From"] = "wechatpay@tencent.com"
+            message["Date"] = "Thu, 06 Nov 2026 10:00:00 +0800"
+            message.set_content("账单")
+            message.add_attachment(b"PK\x03\x04data", maintype="application", subtype="zip", filename="bill.zip")
+            return "OK", [(uid + b" (RFC822)", message.as_bytes())]
+        if command == "STORE":
+            uid, flag, value = args
+            self.stored.append((uid, flag, value))
+            return "OK", [b""]
+        raise AssertionError(f"unexpected UID command: {command}")
+
     def search(self, charset, *criteria):
         self.search_args = criteria
         return "OK", [b" ".join(FakeIMAP.messages.keys())]

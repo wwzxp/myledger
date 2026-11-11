@@ -2618,6 +2618,15 @@ def _mail_secret_key() -> str:
     return load_config().mail.secret_key
 
 
+def _missing_secret_key_hint() -> str:
+    """缺主密钥时告诉用户改哪个文件，而不是让用户猜文件名。"""
+    from app.config import active_config_path
+
+    target = active_config_path()
+    where = str(target) if target else "myledger.toml"
+    return f"缺少主密钥：请在 {where} 的 [mail] 段设置 secret_key（任意长随机串）"
+
+
 def _bootstrap_admin() -> None:
     """首次启动创建管理员，并把初始密码打印到日志。"""
     from app import bootstrap
@@ -2789,11 +2798,45 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def parse_request(self):
+        """每个请求开始前清掉上一次的请求体缓存。
+
+        keep-alive 连接上同一个 Handler 实例会连续处理多个请求，
+        缓存若不清就会把上一个请求的体当成这一个的，导致真实体留在 socket 里。
+        """
+        self._body_cache = None
+        return super().parse_request()
+
     def read_json(self):
-        size = int(self.headers.get("content-length", "0"))
-        if not size:
+        raw = self.read_body()
+        if not raw:
             return {}
-        return json.loads(self.rfile.read(size).decode("utf-8"))
+        return json.loads(raw.decode("utf-8"))
+
+    def read_body(self) -> bytes:
+        """请求体只读一次，结果缓存。
+
+        HTTP/1.1 keep-alive 下漏读请求体会让残留字节变成下一条请求的请求行：
+        mail-fetch 丢弃了 `{}`，紧接着的 POST 就变成 `{}POST /api/mail-download`
+        → 501 Unsupported method。浏览器复用连接，表现为「点下载没反应」。
+        因此所有 POST 都在分发前把体读掉，任何早退路径都不会留下残留。
+        """
+        cached = getattr(self, "_body_cache", None)
+        if cached is not None:
+            return cached
+        try:
+            size = int(self.headers.get("content-length", "0") or 0)
+        except (TypeError, ValueError):
+            size = 0
+        body = b""
+        if size > 0:
+            body = self.rfile.read(size) or b""
+        self._body_cache = body
+        return body
+
+    def drain_body(self):
+        """读掉请求体。分发器已经缓存过体，这里只保证早退路径也不留残留。"""
+        self.read_body()
 
     def client_source(self):
         """限流用的来源标识。Cloudflare 会带 CF-Connecting-IP。"""
@@ -2804,9 +2847,7 @@ class Handler(BaseHTTPRequestHandler):
         )
 
     def handle_mail_settings(self):
-        """保存邮箱账号与授权码到配置文件。"""
-        from app.config import save_mail_settings
-
+        """保存当前用户的邮箱账号与授权码（加密后入 users 表）。"""
         user = self.current_user()
         if user is None:
             self.send_json({"error": "未登录"}, 401)
@@ -2826,9 +2867,7 @@ class Handler(BaseHTTPRequestHandler):
 
         key = _mail_secret_key()
         if not key:
-            self.send_json({
-                "error": "缺少主密钥：请在 myledger.toml 的 [mail] 段设置 secret_key（任意长随机串）"
-            }, 400)
+            self.send_json({"error": _missing_secret_key_hint()}, 400)
             return
 
         # 前端用 **** 表示「不改密码」；空字符串表示清空
@@ -2855,13 +2894,17 @@ class Handler(BaseHTTPRequestHandler):
         self.send_json({"ok": True})
 
     def handle_mail_download(self):
-        """下载链接型邮件里的账单附件。"""
-        from app import mailbox
+        """下载链接型邮件里的账单附件。
+
+        失败时把邮件改回未读：收取阶段已经把它标成已读，
+        失败还留着已读的话，下次点「从邮箱收取」就再也看不到它了。
+        """
+        from app import mailbox, mailcreds
         from app.config import load_config
 
         user = self.current_user()
-        if user is None or not user.is_admin:
-            self.send_json({"error": "需要管理员权限"}, 403)
+        if user is None:
+            self.send_json({"error": "未登录"}, 401)
             return
         try:
             data = self.read_json()
@@ -2869,28 +2912,60 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": "请求格式错误"}, 400)
             return
 
-        url = str(data.get("url") or "")
+        url = str(data.get("url") or "").strip()
         if not url:
             self.send_json({"error": "缺少链接"}, 400)
             return
 
-        config = load_config()
-        inbox = Path(config.mail.mailbox_dir) if config.mail.mailbox_dir else (Path(DB_PATH).parent / "mail-inbox")
+        uid = str(data.get("uid") or "").strip()
         link = mailbox.BillLink(
             url=url,
             subject=str(data.get("subject") or ""),
             sender="",
-            uid=str(data.get("uid") or "link"),
+            uid=uid or "link",
         )
+        config = load_config().mail
         try:
-            saved = mailbox.download_link(link, inbox)
+            saved = mailbox.download_link(link, _mail_inbox_dir(user.id))
         except mailbox.MailError as exc:
-            self.send_json({"error": str(exc)}, 400)
+            restored = self._restore_unread(uid, config, mailcreds)
+            payload = {"error": str(exc), "unread_restored": restored}
+            if not restored:
+                payload["hint"] = "该邮件仍为已读，请到邮箱网页端手动标为未读后再试"
+            self.send_json(payload, 400)
             return
         if saved is None:
             self.send_json({"ok": True, "saved": None, "reason": "文件已存在"})
             return
         self.send_json({"ok": True, "saved": {"filename": saved.filename, "path": str(saved.path)}})
+
+    def _restore_unread(self, uid: str, config, mailcreds) -> bool:
+        """把链接型邮件改回未读。返回是否成功。"""
+        from app import mailbox
+
+        if not uid:
+            return False
+        user = self.current_user()
+        key = _mail_secret_key()
+        if user is None or not key:
+            return False
+        conn = connect()
+        try:
+            creds = mailcreds.load(conn, user.id, key)
+        except mailcreds.CredentialError:
+            return False
+        finally:
+            conn.close()
+        if creds is None or not creds.username or not creds.password:
+            return False
+        return mailbox.unmark_seen(
+            creds.host or config.host,
+            creds.port or config.port,
+            creds.username,
+            creds.password,
+            uid,
+            mailbox=creds.mailbox or config.mailbox,
+        )
 
     def handle_mail_import(self):
         """把待导入目录里的某个压缩包直接导入，无需手动上传。"""
@@ -2972,7 +3047,7 @@ class Handler(BaseHTTPRequestHandler):
 
         key = _mail_secret_key()
         if not key:
-            self.send_json({"error": "缺少主密钥，无法读取邮箱授权码"}, 400)
+            self.send_json({"error": _missing_secret_key_hint()}, 400)
             return
 
         conn2 = connect()
@@ -3004,41 +3079,6 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": str(exc)}, 400)
             return
         self.send_json(result.as_dict())
-
-    def handle_mail_download(self):
-        """下载链接型邮件里的账单附件（当前用户目录）。"""
-        from app import mailbox
-
-        user = self.current_user()
-        if user is None:
-            self.send_json({"error": "未登录"}, 401)
-            return
-        try:
-            data = self.read_json()
-        except Exception:
-            self.send_json({"error": "请求格式错误"}, 400)
-            return
-
-        url = str(data.get("url") or "")
-        if not url:
-            self.send_json({"error": "缺少链接"}, 400)
-            return
-
-        link = mailbox.BillLink(
-            url=url,
-            subject=str(data.get("subject") or ""),
-            sender="",
-            uid=str(data.get("uid") or "link"),
-        )
-        try:
-            saved = mailbox.download_link(link, _mail_inbox_dir(user.id))
-        except mailbox.MailError as exc:
-            self.send_json({"error": str(exc)}, 400)
-            return
-        if saved is None:
-            self.send_json({"ok": True, "saved": None, "reason": "文件已存在"})
-            return
-        self.send_json({"ok": True, "saved": {"filename": saved.filename, "path": str(saved.path)}})
 
     def handle_user_admin(self, data):
         """管理员操作用户：create / reset-password / disable / enable / set-role / delete。"""
@@ -3199,6 +3239,8 @@ class Handler(BaseHTTPRequestHandler):
 
         content_type = self.headers.get("content-type", "")
         if "multipart/form-data" not in content_type:
+            # 不读请求体就必须断开，否则残留字节会污染下一条 keep-alive 请求。
+            self.close_connection = True
             self.send_json({"error": "请以 multipart/form-data 上传文件"}, 400)
             return
 
@@ -3207,6 +3249,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": "请求体为空"}, 400)
             return
         if size > upload.MAX_UPLOAD_BYTES + 1024 * 1024:
+            self.close_connection = True
             self.send_json({"error": "文件过大"}, 413)
             return
 
@@ -3389,6 +3432,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         init_db()
         parsed = urllib.parse.urlparse(self.path)
+        # 分发前先把请求体读完并缓存：HTTP/1.1 keep-alive 下漏读会让残留字节
+        # 变成下一条请求的请求行（`{}POST /api/mail-download` → 501）。
+        # /api/import-upload 自己按 content-length 读 multipart，这里跳过。
+        if not parsed.path.startswith("/api/import-upload"):
+            try:
+                self.read_body()
+            except (OSError, ValueError):
+                pass
         try:
             if parsed.path == "/api/login":
                 self.handle_login()

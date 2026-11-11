@@ -1502,6 +1502,10 @@
   background: #fdf1ef;
   color: var(--red);
 }
+/* 收取/下载失败：默认的 muted 灰太弱，用户会以为成功了 */
+.error-text {
+  color: var(--red);
+}
 .import-help {
   margin-top: 18px;
   padding: 14px 16px;

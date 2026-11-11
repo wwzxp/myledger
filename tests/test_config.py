@@ -66,6 +66,54 @@ class ConfigFileTest(unittest.TestCase):
             load_config("E:/definitely/not/here/myledger.toml")
 
 
+class ActiveConfigPathTest(unittest.TestCase):
+    """`--config` 指定过就要一直用它。
+
+    回归：`_apply_config()` 只用配置里的数据库路径，没保存路径本身，
+    之后 HTTP 处理里的无参 `load_config()` 退回目录发现，读到内置默认值
+    ——部署文件名是 ai-ledger.toml 时，表现为「已配 secret_key 却报缺少主密钥」。
+    """
+
+    def setUp(self):
+        from app import config as config_mod
+
+        self.config_mod = config_mod
+        self.addCleanup(config_mod.set_config_path, None)
+
+    def test_named_config_is_used_by_later_bare_loads(self):
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ai-ledger.toml"
+            path.write_text(
+                '[database]\npath = "E:/data/ledger.db"\n\n'
+                f'[mail]\nsecret_key = "{"x" * 43}"\n',
+                encoding="utf-8",
+            )
+            # 当前目录里没有 myledger.toml：只有固化下来的路径能救这一读。
+            self.config_mod.set_config_path(path)
+            config = self.config_mod.load_config()
+            self.assertEqual(config.source, path)
+            self.assertEqual(config.mail.secret_key, "x" * 43)
+            self.assertEqual(str(config.database.path).replace("\\", "/"), "E:/data/ledger.db")
+
+    def test_cleared_path_falls_back_to_discovery(self):
+        with TemporaryDirectory() as tmp:
+            named = Path(tmp) / "ai-ledger.toml"
+            named.write_text('[model]\nname = "from-named"\n', encoding="utf-8")
+            other = Path(tmp) / "discovered"
+            other.mkdir()
+            (other / "myledger.toml").write_text('[model]\nname = "from-cwd"\n', encoding="utf-8")
+
+            self.config_mod.set_config_path(named)
+            self.assertEqual(self.config_mod.load_config().model.name, "from-named")
+
+            self.config_mod.set_config_path(None)
+            self.assertEqual(self.config_mod.load_config(start=other).model.name, "from-cwd")
+
+    def test_non_existent_path_is_not_pinned(self):
+        self.assertIsNone(self.config_mod.set_config_path("E:/definitely/not/here/x.toml"))
+        self.assertIsNone(self.config_mod.active_config_path())
+
+
 if __name__ == "__main__":
     unittest.main()
 

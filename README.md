@@ -137,6 +137,9 @@ python scripts/build-binary.py                 # 打成单文件（不可交叉�
 配置只从 TOML 文件读取，**不读环境变量**。查找顺序：
 `--config` → 当前目录 `myledger.toml` → `~/.config/myledger/myledger.toml` → 内置默认值。
 
+`--config` 给出后即成为本次进程的**固定配置**：之后的子命令与 HTTP 处理都用它，
+不再退回目录发现。因此配置文件可以叫任意名字（部署脚本用的是 `ai-ledger.toml`）。
+
 ## 许可
 
 MIT。
