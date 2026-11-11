@@ -90,6 +90,10 @@
 | `scripts/make-demo-bills.py` | 脚本 | 生成合成账单，用于部署验证，不含真实数据 | `--` |
 | `scripts/verify-artifacts.py` | 脚本 | 校验三平台打包产物（解压、文件头、大小） | `.github/workflows/build.yml` |
 | `docs/specs/` | 文档 | 产品规格（PRD） | `CHANGELOG.md` |
+| `docs/assets/README.md` | 文档 | README 引用的截图与演示动图（全部为合成数据） | `README.md` |
+| `docs/assets/dashboard.png` | 图片 | 看板三栏结构，README「界面」引用 | `app/bookkeeping_app/static/index.html` |
+| `docs/assets/demo-export.gif` | 图片 | 微信账单导出演示（约 13 秒），README「内置演示」引用 | `app/bookkeeping_app/static/demo/` |
+| `docs/assets/demo-panel.png` | 图片 | 演示面板目录，README「内置演示」引用 | `app/bookkeeping_app/static/demo/catalog.js` |
 | `docs/specs/产品规格-我的账本.md` | 文档 | 问题、用户故事、实现决策、测试决策、范围外 | `CHANGELOG.md`、`docs/architecture/架构.md` |
 | `docs/architecture/` | 文档 | 系统架构（分层、数据流、模块边界） | 各模块 `README.md` |
 | `docs/architecture/架构.md` | 文档 | mermaid 架构图、边界表、关键不变量 | 本文件、各模块 `README.md` |
