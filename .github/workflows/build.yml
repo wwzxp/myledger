@@ -66,11 +66,23 @@ jobs:
           docker run --rm -v "$PWD/dist:/dist:ro" ubuntu:22.04 \
             bash -lc '/dist/myledger --version && /dist/myledger --help | head -3'
 
+      - name: 重命名产物（多平台同名会在 Release 里互相覆盖）
+        shell: bash
+        run: |
+          cd dist
+          if [ -f myledger.exe ]; then
+            mv myledger.exe "myledger-${{ matrix.label }}.exe"
+          else
+            mv myledger "myledger-${{ matrix.label }}"
+            chmod +x "myledger-${{ matrix.label }}"
+          fi
+          ls -lh
+
       - name: 上传产物
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: dist/myledger*
+          path: dist/myledger-*
           if-no-files-found: error
 
   release:

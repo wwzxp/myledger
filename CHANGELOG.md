@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+（暂无）
+
+## [0.1.0] - 2026-11-11
+
 ### Added
 
 - **演示新增美团账单导出**（`static/demo/scenes/export-meituan.js`，13 屏）：
