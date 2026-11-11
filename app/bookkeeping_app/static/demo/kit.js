@@ -147,8 +147,10 @@ export function cursor(root) {
 
     // 落点偏右下：圆点居中会压住按钮上的文字（实测「发送」「完成」被盖住）。
     // 偏移按元素尺寸取比例，小元素（开关、图标）几乎不偏。
-    const dx = Math.min(rect.width * 0.26, 20);
-    const dy = Math.min(rect.height * 0.30, 11);
+    // 只对「有高度的行/按钮」偏移，避免圆点压住按钮文字。
+    // 矮元素（一行文字）不能再偏，否则会落到文字下方，看起来像点偏了。
+    const dx = rect.width > 60 ? Math.min(rect.width * 0.26, 20) : 0;
+    const dy = rect.height > 40 ? Math.min(rect.height * 0.30, 11) : 0;
     const x = (rect.left + rect.width / 2 + dx - box.left) / (scale || 1);
     const y = (rect.top + rect.height / 2 + dy - box.top) / (scale || 1);
 
