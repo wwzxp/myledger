@@ -35,7 +35,9 @@ myledger 把这一步做掉，并处理几件容易被算错的事：
 
 ### 方式一：下载可执行文件（不需要安装 Python）
 
-从 [最新构建](https://github.com/wwzxp/myledger/actions) 的 Artifacts 下载对应平台：
+从 [Releases](https://github.com/wwzxp/myledger/releases/latest) 下载对应平台的单文件二进制。
+也可以在 [最新构建](https://github.com/wwzxp/myledger/actions) 的 Artifacts 里取
+（需登录，且 90 天后过期；Releases 是长期入口）：
 
 | 平台 | 文件 |
 |---|---|
