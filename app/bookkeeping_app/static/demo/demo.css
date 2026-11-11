@@ -3334,3 +3334,372 @@
   background: #b9d6ff;
   color: rgba(255, 255, 255, .9);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   QQ 邮箱授权码：桌面窗口（不是手机壳）
+   画布 560×700，窗口 540×648；字号按可读性取，不照抄 1916px 的原始比例
+   ═══════════════════════════════════════════════════════════ */
+.d-ma-win {
+  position: absolute;
+  left: 10px; top: 34px;
+  width: 540px; height: 648px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 12px 38px rgba(0, 0, 0, .28), 0 0 0 1px rgba(0, 0, 0, .08);
+  font-size: 9.5px;
+  color: #1a1a1a;
+}
+.d-ma-body { position: absolute; inset: 0; }
+.d-ma-page { position: absolute; inset: 0; background: #fff; overflow: hidden; }
+
+/* ── QQ 邮箱顶栏 ── */
+.d-ma-top {
+  display: flex; align-items: center; gap: 8px;
+  height: 34px; padding: 0 10px;
+  border-bottom: 1px solid #eef0f3;
+}
+.d-ma-logo { display: flex; align-items: baseline; gap: 1px; flex: 0 0 auto; }
+.d-ma-logo b { font-size: 13px; color: #1677ff; font-style: italic; letter-spacing: -.5px; }
+.d-ma-logo span { font-size: 9px; color: #1677ff; }
+.d-ma-pagetitle { font-size: 12.5px; font-weight: 600; color: #3b5b8c; margin-left: 6px; }
+.d-ma-search {
+  display: flex; align-items: center; gap: 4px;
+  width: 168px; height: 20px; padding: 0 8px;
+  background: #f2f3f5; border-radius: 10px;
+  color: #a9adb4; font-size: 9px;
+}
+.d-ma-search i { font-style: normal; font-size: 10px; }
+.d-ma-topright { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.d-ma-avatar {
+  width: 17px; height: 17px; border-radius: 50%;
+  background: linear-gradient(140deg, #f0a8c0, #d88aa8);
+  color: #fff; font-size: 8px; font-style: normal;
+  display: grid; place-items: center; flex: 0 0 auto;
+}
+.d-ma-who { display: flex; flex-direction: column; line-height: 1.25; }
+.d-ma-who b { font-size: 9px; font-weight: 500; }
+.d-ma-who span { font-size: 7.5px; color: #9aa0a6; }
+.d-ma-gear {
+  display: flex; align-items: center; gap: 2px;
+  padding: 2px 6px; border-radius: 3px;
+  color: #5b6270; font-size: 8.5px;
+}
+.d-ma-gear i { font-style: normal; font-size: 9px; }
+.d-ma-gear.is-on { background: #e8f1ff; color: #1677ff; }
+
+.d-ma-acctbar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px 6px;
+}
+.d-ma-acctbar b { font-size: 10.5px; font-weight: 600; }
+.d-ma-acctbar span {
+  padding: 1px 5px; border-radius: 2px;
+  background: #fff3e0; color: #d48806; font-size: 7.5px;
+}
+
+/* ── 左栏 + 主区 ── */
+.d-ma-layout { display: flex; height: calc(648px - 34px - 30px); }
+.d-ma-side {
+  width: 116px; flex: 0 0 auto;
+  padding: 6px 6px 10px;
+  background: #f7f8fa;
+  overflow: hidden;
+}
+.d-ma-sideback { font-size: 9px; color: #6b7280; padding: 3px 4px 7px; }
+.d-ma-sidecap {
+  font-size: 7.5px; color: #b0b5bd;
+  padding: 6px 4px 3px;
+}
+.d-ma-sideitem {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3.5px 5px; border-radius: 3px;
+  font-size: 9px; color: #3d4451;
+}
+.d-ma-sideitem i { font-style: normal; font-size: 8px; color: #8a919c; width: 9px; }
+.d-ma-sideitem span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-ma-sideitem em { margin-left: auto; font-style: normal; font-size: 7px; color: #b0b5bd; }
+.d-ma-sideitem.is-on { background: #e2ecff; color: #1677ff; font-weight: 600; }
+.d-ma-sideitem.is-on i { color: #1677ff; }
+
+.d-ma-main { flex: 1; min-width: 0; padding: 10px 14px; overflow: hidden; }
+.d-ma-h1 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.d-ma-h1.is-lg { font-size: 15px; }
+.d-ma-h1.is-center { text-align: center; }
+.d-ma-h2 { font-size: 10.5px; font-weight: 600; margin: 10px 0 5px; }
+.d-ma-hint { font-size: 8.5px; color: #9aa0a6; line-height: 1.55; }
+.d-ma-hint.is-center { text-align: center; }
+.d-ma-hint.is-dim { color: #b6bbc2; }
+.d-ma-k { font-size: 8.5px; color: #6b7280; }
+
+.d-ma-profile {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; border: 1px solid #eef0f3; border-radius: 5px;
+}
+.d-ma-bigavatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(140deg, #f0a8c0, #d88aa8);
+  color: #fff; font-size: 13px; font-style: normal;
+  display: grid; place-items: center; flex: 0 0 auto;
+}
+.d-ma-profileinfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.d-ma-profileinfo b { font-size: 9.5px; font-weight: 500; }
+.d-ma-profileinfo span { font-size: 8.5px; color: #9aa0a6; }
+.d-ma-edit { margin-left: auto; font-style: normal; font-size: 8.5px; color: #1677ff; }
+
+.d-ma-bday { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.d-ma-select {
+  padding: 2px 8px; border: 1px solid #e4e7eb; border-radius: 3px;
+  font-size: 8.5px; color: #3d4451;
+}
+
+.d-ma-cap { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.d-ma-cap .d-ma-k { width: 52px; }
+.d-ma-bar {
+  flex: 1; height: 5px; border-radius: 3px;
+  background: #eef0f3; overflow: hidden;
+}
+.d-ma-bar i { display: block; height: 100%; background: #1677ff; border-radius: 3px; }
+.d-ma-cap em { font-style: normal; font-size: 8px; color: #9aa0a6; }
+
+/* ── 账号与安全：蓝底 + 居中白卡 ── */
+.d-ma-blueband {
+  position: absolute; left: 0; right: 0; top: 34px;
+  height: 74px; background: #4a9df8;
+}
+.d-ma-card2 {
+  position: absolute; left: 40px; right: 40px; top: 56px; bottom: 14px;
+  display: flex; background: #fff; border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+  overflow: hidden;
+}
+.d-ma-card2left {
+  width: 138px; flex: 0 0 auto;
+  padding: 14px 10px;
+  text-align: center;
+  border-right: 0;
+}
+.d-ma-c2mail { display: block; margin-top: 8px; font-size: 9px; font-weight: 500; }
+.d-ma-c2mail2 { display: block; font-size: 8px; color: #9aa0a6; margin-top: 1px; }
+.d-ma-c2nav { margin-top: 14px; display: flex; flex-direction: column; gap: 2px; }
+.d-ma-c2navitem {
+  padding: 5px 8px; font-size: 9px; color: #3d4451; border-radius: 3px;
+}
+.d-ma-c2navitem.is-on { color: #1677ff; font-weight: 600; }
+
+.d-ma-card2right { flex: 1; min-width: 0; padding: 14px 18px; overflow: hidden; }
+.d-ma-bigselect {
+  margin-top: 4px; padding: 5px 8px;
+  border: 1px solid #e4e7eb; border-radius: 3px;
+  font-size: 9px; color: #3d4451;
+}
+.d-ma-mailrow { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+.d-ma-mailico {
+  width: 14px; height: 14px; border-radius: 3px;
+  background: #1677ff; color: #fff;
+  font-size: 7px; font-style: normal;
+  display: grid; place-items: center; flex: 0 0 auto;
+}
+.d-ma-mailk { font-size: 8.5px; color: #6b7280; width: 46px; }
+.d-ma-mailv { font-size: 8.5px; color: #3d4451; }
+.d-ma-mailact { margin-left: auto; font-style: normal; font-size: 8px; color: #1677ff; }
+
+.d-ma-kv {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0; border-bottom: 1px solid #f4f5f7;
+}
+.d-ma-v { margin-left: auto; font-size: 9px; }
+
+/* ── 按钮 ── */
+.d-ma-btnrow { display: flex; gap: 6px; margin-top: 4px; }
+.d-ma-btn {
+  display: inline-block; padding: 4px 10px;
+  border-radius: 3px; font-size: 8.5px; line-height: 1.2;
+}
+.d-ma-btn.is-ghost { border: 1px solid #dcdfe4; color: #3d4451; }
+.d-ma-btn.is-primary { background: #1677ff; color: #fff; margin-top: 4px; }
+.d-ma-btn.is-outline { border: 1px solid #1677ff; color: #1677ff; margin-top: 6px; }
+.d-ma-btn.is-solid { background: #1677ff; color: #fff; }
+.d-ma-btn.is-center { display: block; width: 96px; margin: 12px auto 0; text-align: center; }
+
+/* 关键区：IMAP 服务 */
+.d-ma-imap {
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid #eef0f3;
+}
+.d-ma-imap b { font-size: 9px; font-weight: 500; }
+.d-ma-imap em { font-style: normal; font-size: 8.5px; color: #9aa0a6; }
+.d-ma-imaphint { display: block; margin-top: 3px; font-size: 8px; color: #9aa0a6; }
+
+/* ── 窄卡（短信验证 / 授权码）── */
+.d-ma-narrow {
+  position: absolute; left: 50px; right: 50px; top: 62px;
+  padding: 14px 20px;
+  border: 1px solid #eef0f3; border-radius: 4px;
+  min-height: 150px;
+}
+.d-ma-back { font-size: 11px; color: #8a919c; margin-bottom: 6px; }
+.d-ma-qrwrap {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; padding: 8px 10px;
+  border: 1px solid #dfe3e8; border-radius: 3px;
+  background: #fbfcfd;
+}
+.d-ma-qr {
+  width: 52px; height: 52px; flex: 0 0 auto;
+  background: #fff; padding: 2px;
+  border: 1px solid #e4e7eb;
+}
+.d-ma-qrgrid {
+  display: grid; width: 100%; height: 100%;
+  gap: 0;
+}
+.d-ma-qrgrid i { background: transparent; }
+.d-ma-qrgrid i.on { background: #1a1a1a; }
+.d-ma-qrtip { font-size: 8px; color: #6b7280; line-height: 1.5; }
+.d-ma-link { font-size: 8px; color: #1677ff; margin-top: 7px; }
+.d-ma-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px;
+}
+.d-ma-footer .d-ma-link { margin-top: 0; color: #6b7280; }
+
+.d-ma-check {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #21a366; color: #fff;
+  font-size: 18px; display: grid; place-items: center;
+  margin: 4px auto 10px;
+}
+.d-ma-codebox {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 10px 0 8px; padding: 9px 0;
+  background: #f6f7f9; border-radius: 3px;
+}
+.d-ma-code { font-size: 13px; letter-spacing: 1.5px; color: #1a1a1a; }
+.d-ma-copy { font-style: normal; font-size: 9px; color: #9aa0a6; }
+.d-ma-copy.is-copied { color: #21a366; }
+.d-ma-noterow { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.d-ma-noteinput { flex: 1; font-size: 8.5px; color: #b6bbc2; border-bottom: 1px solid #e4e7eb; padding-bottom: 2px; }
+
+/* ── 我的账本（深色侧栏）── */
+.d-ma-lside {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 104px; background: #1b1d21; color: #c9ccd2;
+  padding: 8px 0;
+}
+.d-ma-brand { padding: 2px 10px 8px; }
+.d-ma-brand b { display: block; font-size: 11px; color: #fff; }
+.d-ma-brand span { font-size: 7px; color: #7f838b; letter-spacing: .5px; }
+.d-ma-month {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 0 6px 8px; padding: 5px 6px;
+  background: #26282d; border-radius: 3px;
+}
+.d-ma-month span { font-size: 8px; color: #c9ccd2; }
+.d-ma-month b { font-size: 8px; color: #e8a33d; font-weight: 600; }
+.d-ma-lnav {
+  padding: 5px 12px; font-size: 9px; color: #9ba0a8;
+}
+.d-ma-lnav.is-on {
+  color: #fff; background: #2a2d33;
+  border-left: 2px solid #e8a33d; padding-left: 10px;
+}
+
+.d-ma-lmain {
+  position: absolute; left: 104px; right: 0; top: 0; bottom: 0;
+  background: #f5f6f7; overflow: hidden;
+}
+.d-ma-ltop {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px; background: #fff;
+  border-bottom: 1px solid #e9ebee;
+}
+.d-ma-ltitle { font-size: 11.5px; font-weight: 600; }
+.d-ma-ltopright { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.d-ma-ltool {
+  padding: 3px 6px; border: 1px solid #e4e7eb; border-radius: 3px;
+  font-size: 7.5px; color: #4a5058;
+}
+.d-ma-ltool.is-strong { font-weight: 600; color: #1a1a1a; }
+
+.d-ma-sec { padding: 8px 12px; background: #fff; margin-bottom: 6px; }
+.d-ma-sechead { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.d-ma-sechead b { font-size: 10px; font-weight: 600; }
+.d-ma-sechead span { margin-left: auto; font-size: 7.5px; color: #9aa0a6; }
+.d-ma-lrow {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid #f4f5f7;
+}
+.d-ma-lrow:last-child { border-bottom: 0; }
+.d-ma-lrow > div { display: flex; flex-direction: column; gap: 1px; }
+.d-ma-lrow b { font-size: 9px; font-weight: 500; }
+.d-ma-lrow span { font-size: 7.5px; color: #9aa0a6; }
+.d-ma-sw {
+  margin-left: auto; width: 24px; height: 14px; border-radius: 7px;
+  background: #d8dbe0; position: relative; flex: 0 0 auto;
+}
+.d-ma-sw i {
+  position: absolute; top: 2px; left: 2px;
+  width: 10px; height: 10px; border-radius: 50%; background: #fff;
+}
+.d-ma-sw.is-on { background: #1677ff; }
+.d-ma-sw.is-on i { left: 12px; }
+
+.d-ma-luser { font-size: 9.5px; font-weight: 600; }
+.d-ma-lrole { display: block; font-size: 7.5px; color: #9aa0a6; margin: 1px 0 5px; }
+.d-ma-pwrow { display: flex; align-items: center; gap: 6px; }
+.d-ma-pwcell { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.d-ma-pwcell span { font-size: 7.5px; color: #6b7280; }
+.d-ma-linput {
+  height: 16px; border: 1px solid #e4e7eb; border-radius: 3px;
+  background: #fff;
+}
+.d-ma-linput.is-big { height: 18px; display: flex; align-items: center; padding: 0 5px; }
+.d-ma-linput.is-big span { font-size: 8.5px; }
+
+.d-ma-mailform { display: flex; align-items: flex-end; gap: 6px; }
+.d-ma-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.d-ma-field > span { font-size: 7.5px; color: #6b7280; }
+.d-ma-dots { font-size: 9px; letter-spacing: 1px; color: #1a1a1a; }
+.d-ma-lbtn {
+  padding: 3px 8px; border-radius: 3px; font-size: 8px; line-height: 1.3;
+  flex: 0 0 auto;
+}
+.d-ma-lbtn.is-ghost { border: 1px solid #e4e7eb; color: #4a5058; }
+.d-ma-lbtn.is-primary { background: #1677ff; color: #fff; }
+.d-ma-lbtn.is-done { background: #21a366; }
+.d-ma-badge {
+  padding: 2px 5px; border-radius: 2px;
+  background: #e8f5ec; color: #21a366; font-size: 7px;
+}
+.d-ma-lhint {
+  margin-top: 6px; font-size: 7.5px; color: #9aa0a6; line-height: 1.55;
+}
+.d-ma-userrow { display: flex; align-items: center; gap: 5px; padding: 4px 0; }
+.d-ma-userrow b { font-size: 9px; font-weight: 500; }
+.d-ma-mini {
+  padding: 1.5px 5px; border: 1px solid #e4e7eb; border-radius: 2px;
+  font-size: 7px; color: #4a5058;
+}
+.d-ma-mini.is-danger { border-color: #f5222d; color: #f5222d; }
+
+/* 第 1 屏补的分隔行 / 第 3 屏推广卡 / 徽标不越界 */
+.d-ma-select.is-wide { min-width: 62px; }
+.d-ma-lrow.is-plain { border-bottom: 0; }
+.d-ma-promo {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px; padding: 8px 10px;
+  background: #fffaf0; border: 1px solid #f5e2b8; border-radius: 3px;
+}
+.d-ma-promomain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.d-ma-promomain b { font-size: 9px; font-weight: 600; color: #8a5a00; }
+.d-ma-promomain span { font-size: 7.5px; color: #a98a4b; line-height: 1.5; }
+.d-ma-promoqr {
+  width: 34px; height: 34px; flex: 0 0 auto;
+  background: #fff; padding: 2px; border: 1px solid #eddcb8;
+}
+.d-ma-mailform { gap: 5px; }
+.d-ma-field { min-width: 0; }
+.d-ma-linput.is-big { overflow: hidden; }
+.d-ma-linput.is-big span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d-ma-badge { flex: 0 0 auto; margin-right: 1px; }

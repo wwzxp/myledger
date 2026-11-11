@@ -46,6 +46,29 @@ export const DEMO_GROUPS = [
     ],
   },
   {
+    key: "prep",
+    label: "导入之前",
+    tag: "PREP",
+    items: [
+      {
+        key: "mail-auth-code",
+        name: "邮箱授权码怎么拿",
+        caption: "QQ 邮箱网页端开一次 IMAP，拿到授权码回来填进设置。",
+        use: "配置邮件",
+        need: "想用「从邮箱收取附件」，但不知道授权码在哪生成",
+        story: "不先拿到授权码，「从邮箱收取附件」是点不动的。",
+        flow: [
+          "QQ 邮箱右上角「设置」→ 左侧「账号与安全」",
+          "「安全设置」→ 找到 POP3/IMAP 服务 →「开启服务」",
+          "扫码验证手机号 → 拿到 16 位授权码",
+          "回我的账本「设置」→ 填邮箱账号和授权码 → 保存",
+        ],
+        edge: "授权码等价于邮箱密码 · 只在浏览器登录第三方客户端时使用",
+        brand: "local",
+      },
+    ],
+  },
+  {
     key: "import",
     label: "导入之后",
     tag: "IMPORT",

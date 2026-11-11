@@ -39,10 +39,14 @@ function mkPage(shell) {
 }
 
 function go(tl, from, to, at = ">") {
-  tl.to(from, { opacity: 0, duration: 0.18 }, at)
+  // 点完先在原页面停一下：观众要看清「点了哪儿」，再跳走。
+  tl.to({}, { duration: 0.62 }, at)
+    .to(from, { opacity: 0, duration: 0.2 }, ">")
     .call(() => { from.style.display = "none"; from.style.opacity = 1; }, null, ">")
     .call(() => { to.style.display = "block"; }, null, "<")
-    .fromTo(to, { opacity: 0, x: 14 }, { opacity: 1, x: 0, duration: 0.24 }, "<");
+    .fromTo(to, { opacity: 0, x: 14 }, { opacity: 1, x: 0, duration: 0.26 }, "<")
+    // 新页面再停一下，让人先扫一眼整体，再等光标动。
+    .to({}, { duration: 0.55 }, ">");
 }
 
 /** 表单页大标题 */

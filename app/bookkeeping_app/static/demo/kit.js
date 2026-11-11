@@ -169,6 +169,7 @@ export function cursor(root) {
     // 目标坐标必须在动画真正播放时才取：菜单弹出、页面切换都有过渡，
     // 构建时间点取到的是起始状态，位置当然是错的。
     toAt(tl, target, opts = {}) {
+      const dur = opts.duration ?? 0.45;
       tl.call(() => {
         const p = moveTo(target);
         if (!p) return;              // 目标不可见，光标留在原处
@@ -177,7 +178,7 @@ export function cursor(root) {
         gsap.to({ x: curX, y: curY }, {
           x: p.x,
           y: p.y,
-          duration: opts.duration ?? 0.45,
+          duration: dur,
           ease: "power2.inOut",
           onUpdate() {
             curX = this.targets()[0].x;
@@ -186,6 +187,10 @@ export function cursor(root) {
           },
         });
       }, null, opts.at ?? ">");
+      // 关键：光标补间是独立于时间线的 GSAP tween，tl.call 会立刻返回。
+      // 不补一个等长占位，时间线会马上进入 click / 切页，
+      // 表现为「光标还在路上，页面已经跳了」。
+      tl.to({}, { duration: dur }, "<");
       return tl;
     },
     // 只画点击波纹，不再移动光标位置。
